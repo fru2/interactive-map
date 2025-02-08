@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import SideNav from "@/components/SideNav";
 import { fetchLocation } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
+import LocationDetails from "./LocationDetails";
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
@@ -80,10 +81,8 @@ const MapComponent = () => {
           {customIcon &&
             markers.map((marker) => (
               <Marker key={marker.id} position={[marker.lat, marker.lng]} icon={customIcon}>
-                <Popup>
-                  <h3>{marker.name}</h3>
-                  <p>Latitude: {marker.lat}</p>
-                  <p>Longitude: {marker.lng}</p>
+                <Popup minWidth={600}>
+                  <LocationDetails name={marker.name} lat={marker.lat} long={marker.lng} />
                 </Popup>
               </Marker>
             ))}

@@ -25,6 +25,10 @@ body {
   background: #2f2f2f; /* Background matches dark theme */
 }
 
+.text-lat-long{
+  margin-top: 0px!important;
+}
+
 @layer base {
   :root {
     --background: 240 10% 3.9%;
