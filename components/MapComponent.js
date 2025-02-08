@@ -3,6 +3,9 @@
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { useMap } from "react-leaflet";
+import { useToast } from "@/hooks/use-toast";
+import SideNav from "@/components/SideNav";
+import { fetchLocation } from "@/utils/api";
 import "leaflet/dist/leaflet.css";
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
@@ -12,27 +15,21 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { 
 
 let L;
 
-const markers = [
-  { id: 1, lat: 28.6139, lng: 77.2090, name: "Delhi" },
-  { id: 2, lat: 19.0760, lng: 72.8777, name: "Mumbai" },
-  { id: 3, lat: 12.9716, lng: 77.5946, name: "Bangalore" },
-];
-
 const FlyToMarker = ({ selectedMarker }) => {
   const map = useMap();
-
   useEffect(() => {
     if (selectedMarker && map) {
-      map.flyTo([selectedMarker.lat, selectedMarker.lng], 10, { animate: true }); 
+      map.flyTo([selectedMarker.lat, selectedMarker.lng], 10, { animate: true });
     }
   }, [selectedMarker, map]);
-
   return null;
 };
 
 const MapComponent = () => {
+  const { toast } = useToast();
   const [customIcon, setCustomIcon] = useState(null);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
     import("leaflet").then((leaflet) => {
@@ -46,35 +43,40 @@ const MapComponent = () => {
         })
       );
     });
+
+    const savedMarkers = localStorage.getItem("markers");
+    if (savedMarkers) {
+      setMarkers(JSON.parse(savedMarkers));
+    } else {
+      import("@/data/markers.json").then((data) => {
+        setMarkers(data.default);
+        localStorage.setItem("markers", JSON.stringify(data.default));
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("markers", JSON.stringify(markers));
+  }, [markers]);
+
+  const searchLocation = async (query) => {
+    const newMarker = await fetchLocation(query, toast);
+    if (newMarker) {
+      setMarkers((prev) => [...prev, newMarker]);
+      setSelectedMarker(newMarker);
+    }
+  };
+
+  const removeMarker = (id) => {
+    setMarkers((prev) => prev.filter((marker) => marker.id !== id));
+  };
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
-      <div className="w-1/4 bg-gray-800 text-white p-4">
-        <h2 className="text-xl font-bold mb-4">Locations</h2>
-        {markers.map((marker) => (
-          <button
-            key={marker.id}
-            className="block w-full text-left px-4 py-2 mb-2 bg-gray-700 hover:bg-gray-600 rounded"
-            onClick={() => setSelectedMarker(marker)}
-          >
-            {marker.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="w-3/4">
-        <MapContainer
-          style={{ height: "100vh", width: "100%" }}
-          zoom={5}
-          center={[20.5937, 78.9629]} 
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-
+      <SideNav markers={markers} setSelectedMarker={setSelectedMarker} searchLocation={searchLocation} removeMarker={removeMarker} />
+      <div className="w-full">
+        <MapContainer style={{ height: "100vh", width: "100%", borderRadius: "1rem" }} zoom={5} center={[20.5937, 78.9629]}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
           {customIcon &&
             markers.map((marker) => (
               <Marker key={marker.id} position={[marker.lat, marker.lng]} icon={customIcon}>
@@ -85,7 +87,6 @@ const MapComponent = () => {
                 </Popup>
               </Marker>
             ))}
-
           {selectedMarker && <FlyToMarker selectedMarker={selectedMarker} />}
         </MapContainer>
       </div>
