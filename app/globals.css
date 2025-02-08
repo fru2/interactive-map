@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
+* {
   box-sizing: border-box;
 }
 
@@ -12,21 +12,39 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 6px; /* Thin scrollbar */
-  height: 6px; /* For horizontal scrollbars */
+  width: 6px;
+  /* Thin scrollbar */
+  height: 6px;
+  /* For horizontal scrollbars */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #65656f; /* Dark grey thumb */
-  border-radius: 6px; /* Rounded corners */
+  background: #65656f;
+  /* Dark grey thumb */
+  border-radius: 6px;
+  /* Rounded corners */
 }
 
 ::-webkit-scrollbar-track {
-  background: #2f2f2f; /* Background matches dark theme */
+  background: #2f2f2f;
+  /* Background matches dark theme */
 }
 
-.text-lat-long{
-  margin-top: 0px!important;
+/* Default size (Desktop) */
+.leaflet-popup-content {
+  width: 600px !important;
+}
+
+/* Smaller size for Mobile */
+@media (max-width: 640px) {
+  .leaflet-popup-content {
+    width: 300px !important;
+  }
+
+  .leaflet-container{
+    border-top-right-radius: 0.8rem!important;
+    border-bottom-left-radius: 0!important;
+  }
 }
 
 @layer base {
@@ -87,6 +105,7 @@ body {
 }
 
 @layer components {
+
   .card,
   .button,
   .input,
@@ -96,7 +115,8 @@ body {
   .dialog,
   .alert,
   .dropdown-menu {
-    @apply rounded-lg; /* Ensure specific components have rounded corners */
+    @apply rounded-lg;
+    /* Ensure specific components have rounded corners */
   }
 }
 
@@ -106,6 +126,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

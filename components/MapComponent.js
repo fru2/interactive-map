@@ -73,7 +73,7 @@ const MapComponent = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex flex-col h-screen sm:flex-row">
       <SideNav markers={markers} setSelectedMarker={setSelectedMarker} searchLocation={searchLocation} removeMarker={removeMarker} />
       <div className="w-full">
         <MapContainer style={{ height: "100vh", width: "100%", borderRadius: "0.8rem", borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} zoom={5} center={[20.5937, 78.9629]}>
@@ -81,7 +81,7 @@ const MapComponent = () => {
           {customIcon &&
             markers.map((marker) => (
               <Marker key={marker.id} position={[marker.lat, marker.lng]} icon={customIcon}>
-                <Popup minWidth={600}>
+                <Popup >
                   <LocationDetails name={marker.name} lat={marker.lat} long={marker.lng} />
                 </Popup>
               </Marker>

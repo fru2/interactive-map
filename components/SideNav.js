@@ -20,9 +20,9 @@ const SideNav = ({ markers, setSelectedMarker, searchLocation, removeMarker }) =
   });
 
   return (
-    <div className="w-1/4 min-w-60 max-w-80 bg-[#1b1b1b] text-zinc-200 p-4 h-screen max-h-screen relative flex flex-col justify-between">
+    <div className="w-full sm:w-1/4 sm:min-w-60 sm:max-w-80 bg-[#1b1b1b] text-zinc-200 p-4 h-fit sm:h-screen max-h-screen relative flex flex-col justify-between">
       <div>
-        <div className="flex gap-2 justify-center items-center mb-4">
+        <div className="flex gap-2 sm:justify-center items-center mb-4">
           <Map />
           <h2 className="text-xl font-extralight">Lookal</h2>
         </div>
@@ -53,9 +53,9 @@ const SideNav = ({ markers, setSelectedMarker, searchLocation, removeMarker }) =
         </div>
 
         {/* Scrollable Marker List */}
-        <div className="space-y-2 overflow-y-auto h-[calc(100vh-250px)] mr-[-0.5rem] pr-2">
+        <div className="space-y-2 overflow-y-auto sm:h-[calc(100vh-250px)] mr-[-0.5rem] pr-2">
           {sortedMarkers.map((marker) => (
-            <div key={marker.id} className="flex justify-between items-center border p-2 rounded hover:bg-[#27272a] duration-150">
+            <div key={marker.id} className="flex justify-between items-center border sm:p-2 rounded hover:bg-[#27272a] duration-150">
 
               <Button
                 variant="ghost"
@@ -81,7 +81,7 @@ const SideNav = ({ markers, setSelectedMarker, searchLocation, removeMarker }) =
         <Input
           type="text"
           placeholder="Search location..."
-          className="w-full border-zinc-600"
+          className="w-full border-zinc-600 text-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
