@@ -36,7 +36,7 @@ const MapComponent = () => {
       L = leaflet;
       setCustomIcon(
         new L.Icon({
-          iconUrl: "/location_on.svg",
+          iconUrl: "/location_pin.svg",
           iconSize: [30, 45],
           iconAnchor: [15, 45],
           popupAnchor: [0, -40],
@@ -75,7 +75,7 @@ const MapComponent = () => {
     <div className="flex h-screen">
       <SideNav markers={markers} setSelectedMarker={setSelectedMarker} searchLocation={searchLocation} removeMarker={removeMarker} />
       <div className="w-full">
-        <MapContainer style={{ height: "100vh", width: "100%", borderRadius: "1rem" }} zoom={5} center={[20.5937, 78.9629]}>
+        <MapContainer style={{ height: "100vh", width: "100%", borderRadius: "0.8rem", borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} zoom={5} center={[20.5937, 78.9629]}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
           {customIcon &&
             markers.map((marker) => (

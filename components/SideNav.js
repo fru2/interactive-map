@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import { ChevronUp, ChevronDown, Map, MapPin } from "lucide-react";
+import Image from "next/image";
+
 const SideNav = ({ markers, setSelectedMarker, searchLocation, removeMarker }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [nameSortAsc, setNameSortAsc] = useState(null);
@@ -17,46 +20,75 @@ const SideNav = ({ markers, setSelectedMarker, searchLocation, removeMarker }) =
   });
 
   return (
-    <div className="w-1/4 min-w-60 max-w-80 bg-[#1b1b1b] text-white p-4 max-h-screen overflow-y-auto">
-      <h2 className="text-xl font-bold mb-4">Locations</h2>
-      
-      <span className="w-full block text-center">Sort by:</span>
-      <div className="flex space-x-2 mb-4 w-full">
-        <Button variant="outline" className="w-full"
-          onClick={() => {
-            setNameSortAsc(nameSortAsc === null ? true : !nameSortAsc);
-            setDateSortAsc(null);
-          }}
-        >
-          Name {nameSortAsc ? "▲" : "▼"}
-        </Button>
+    <div className="w-1/4 min-w-60 max-w-80 bg-[#1b1b1b] text-zinc-200 p-4 h-screen max-h-screen relative flex flex-col justify-between">
+      <div>
+        <div className="flex gap-2 justify-center items-center mb-4">
+          <Map />
+          <h2 className="text-xl font-extralight">Lookal</h2>
+        </div>
+        <span className="w-full block text-center text-secondary text-sm">Sort by:</span>
+        <div className="flex space-x-2 mt-2 mb-4 w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full bg-[#27272a] hover:bg-[#313135]"
+            onClick={() => {
+              setNameSortAsc(nameSortAsc === null ? true : !nameSortAsc);
+              setDateSortAsc(null);
+            }}
+          >
+            Name {nameSortAsc ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full bg-[#27272a] hover:bg-[#313135]"
+            onClick={() => {
+              setDateSortAsc(dateSortAsc === null ? true : !dateSortAsc);
+              setNameSortAsc(null);
+            }}
+          >
+            Newest {dateSortAsc ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </Button>
+        </div>
 
-        <Button variant="outline" className="w-full"
-          onClick={() => {
-            setDateSortAsc(dateSortAsc === null ? true : !dateSortAsc);
-            setNameSortAsc(null);
-          }}
-        >
-          Newest {dateSortAsc ? "▲" : "▼"}
-        </Button>
+        {/* Scrollable Marker List */}
+        <div className="space-y-2 overflow-y-auto h-[calc(100vh-250px)] mr-[-0.5rem] pr-2">
+          {sortedMarkers.map((marker) => (
+            <div key={marker.id} className="flex justify-between items-center border p-2 rounded hover:bg-[#27272a] duration-150">
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-zinc-200 truncate"
+                onClick={() => setSelectedMarker(marker)}
+              >
+                {marker.name}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeMarker(marker.id)}
+              >
+                ✖
+              </Button>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="space-y-2">
-        {sortedMarkers.map((marker) => (
-          <div key={marker.id} className="flex justify-between items-center border p-2 rounded hover:bg-[#27272a] duration-150">
-            <Button variant="ghost" className="w-full justify-start text-white truncate" onClick={() => setSelectedMarker(marker)}>
-              {marker.name}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => removeMarker(marker.id)}>
-              ✖
-            </Button>
-          </div>
-        ))}
-      </div>
-      <div className="flex mb-4 flex-col gap-2 mt-16">
-        <Input type="text" placeholder="Search location..." className="w-full" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-        <Button onClick={() => searchLocation(searchQuery)}>Add Marker</Button>
+
+      {/* Search Input & Add Marker Button */}
+      <div className="flex mb-4 mt-4 flex-col gap-2">
+        <Input
+          type="text"
+          placeholder="Search location..."
+          className="w-full border-zinc-600"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <Button size="sm" onClick={() => searchLocation(searchQuery)}>Add Marker</Button>
       </div>
     </div>
+
   );
 };
 
