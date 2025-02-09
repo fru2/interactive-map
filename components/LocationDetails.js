@@ -1,58 +1,66 @@
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge"; // Import Badge
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require("@google/generative-ai");
+
+const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY; // Use your API key environment variable
+const genAI = new GoogleGenerativeAI(apiKey);
 
 const LocationDetails = ({ name, lat, long }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (attempt = 1) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    text: `Give a brief description, top 5 famous places (just names), and top 5 famous foods (just names) for ${name}.`,
-                  },
-                ],
-              },
-            ],
-          }),
-        }
-      );
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash-exp",
+        systemInstruction: "You are a tour guide.  Provide the information in JSON format.",
+      });
 
-      const result = await response.json();
-      console.log(`API Response (Attempt ${attempt}):`, result);
+      const generationConfig = {
+        temperature: 0.5, // Reduced temperature for more consistent results
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 2048, // Adjusted token limit
+        responseMimeType: "application/json", // Important for JSON parsing
+      };
 
-      // Extract AI response text
-      const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-      // Extract description, places, and foods
-      const descriptionMatch = text.match(/^(.*)\n\n\*\*Top 5 Famous Places:/s);
-      const matches = text.match(/\*\*Top 5 Famous Places:\*\*(.*)\*\*Top 5 Famous Foods:\*\*(.*)/s);
-
-      const description = descriptionMatch ? descriptionMatch[1].trim() : "";
-      const places = matches?.[1]?.trim().split("\n").map((p) => p.replace(/^\d+\.\s*/, "")) || [];
-      const foods = matches?.[2]?.trim().split("\n").map((f) => f.replace(/^\d+\.\s*/, "")) || [];
-
-      if (!description && places.length === 0 && foods.length === 0 && attempt < 3) {
-        console.warn(`Empty response, retrying... (Attempt ${attempt + 1})`);
-        setTimeout(() => fetchData(attempt + 1), 500); // Retry with a slight delay
-      } else {
-        setData({ description, places, foods });
+      const prompt = `Give a brief description, top 5 famous places (just names), and top 5 famous foods (just names) for ${name}. Return the response in the following JSON format:
+      \`\`\`json
+      {
+        "description": "description of the place",
+        "places": ["place1", "place2", "place3", "place4", "place5"],
+        "foods": ["food1", "food2", "food3", "food4", "food5"]
       }
+      \`\`\``;
+
+
+      const chatSession = model.startChat({
+        generationConfig,
+        history: [],
+      });
+
+      const result = await chatSession.sendMessage(prompt);
+      const responseText = result.response.text();
+
+      try {
+        const jsonData = JSON.parse(responseText);
+        setData(jsonData);
+      } catch (jsonError) {
+        console.error("Error parsing JSON:", jsonError);
+        console.error("Raw response:", responseText); // Log the raw response for debugging
+        // Handle the parsing error, perhaps by displaying an error message to the user.
+        setData({ description: "Error fetching data. Please try again later.", places: [], foods: [] });
+      }
+
     } catch (error) {
       console.error("Error fetching location data:", error);
+      setData({ description: "Error fetching data. Please try again later.", places: [], foods: [] }); // Set default data in case of error
     } finally {
       setLoading(false);
     }
